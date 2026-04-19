@@ -22,7 +22,7 @@ Sometimes you already have the DOI and just want the reference without opening a
 
 ## Install
 
-Add to Raycast via [extensions](raycast://manage-extensions?names=doi2bib) or install from source:
+Add to Raycast via `raycast://manage-extensions?names=doi2bib` or install from source:
 
 ```bash
 git clone https://github.com/molchalih/doi2bib.git

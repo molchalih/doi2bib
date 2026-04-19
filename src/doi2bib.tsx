@@ -1,6 +1,8 @@
-import { Action, ActionPanel, Clipboard, List, LocalStorage, showHUD, showToast, popToRoot, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Icon, List, LocalStorage, environment, open, showHUD, showToast, popToRoot, Toast } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
-import { HistoryEntry, looksLikeDoi, relativeTime, addToHistory, extractDoi } from "./utils";
+import { HistoryEntry, looksLikeDoi, relativeTime, addToHistory, extractDoi, formatBib } from "./utils";
+import { writeFileSync } from "fs";
+import { join } from "path";
 
 const STORAGE_KEY = "doi2bib-history";
 
@@ -10,6 +12,7 @@ export default function Command() {
   const historyRef = useRef<HistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentBib, setCurrentBib] = useState<string | null>(null);
+  const [selectedItemId, setSelectedItemId] = useState<string | undefined>("");
 
   useEffect(() => {
     async function init() {
@@ -57,11 +60,13 @@ export default function Command() {
       if (!bib.trim()) {
         throw new Error("No BibTeX returned");
       }
-      setCurrentBib(bib);
-      const entry: HistoryEntry = { doi: trimmed, bib, fetchedAt: new Date().toISOString() };
+      const formatted = formatBib(bib);
+      setCurrentBib(formatted);
+      const entry: HistoryEntry = { doi: trimmed, bib: formatted, fetchedAt: new Date().toISOString() };
       const updated = addToHistory(historyRef.current, entry);
       historyRef.current = updated;
       setHistory(updated);
+      setSelectedItemId(trimmed);
       await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -73,8 +78,23 @@ export default function Command() {
 
   const showFetchItem = looksLikeDoi(doi) && doi !== history[0]?.doi;
 
+  async function clearHistory() {
+    await LocalStorage.removeItem(STORAGE_KEY);
+    historyRef.current = [];
+    setHistory([]);
+    setSelectedItemId("");
+  }
+
+  async function downloadBib() {
+    const content = history.map((e) => e.bib).join("\n\n");
+    const filePath = join(environment.supportPath, "history.bib");
+    writeFileSync(filePath, content, "utf8");
+    await open(filePath);
+  }
+
   return (
     <List
+      selectedItemId={selectedItemId}
       isLoading={isLoading}
       isShowingDetail
       filtering={false}
@@ -84,6 +104,7 @@ export default function Command() {
     >
       {showFetchItem && (
         <List.Item
+          id="fetch-item"
           title={`↩ Fetch: ${doi}`}
           detail={
             <List.Item.Detail
@@ -111,9 +132,10 @@ export default function Command() {
       )}
 
       {history.length > 0 && (
-        <List.Section title="History">
+        <List.Section title="History" subtitle="⌘⇧⌫ Clear · ⌘S Download">
           {history.map((entry) => (
             <List.Item
+              id={entry.doi}
               key={entry.doi}
               title={entry.doi}
               subtitle={relativeTime(entry.fetchedAt)}
@@ -127,6 +149,18 @@ export default function Command() {
                       await showHUD("Copied!");
                       await popToRoot();
                     }}
+                  />
+                  <Action
+                    title="Clear History"
+                    icon={Icon.Trash}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
+                    onAction={clearHistory}
+                  />
+                  <Action
+                    title="Download .bib"
+                    icon={Icon.Download}
+                    shortcut={{ modifiers: ["cmd"], key: "s" }}
+                    onAction={downloadBib}
                   />
                 </ActionPanel>
               }

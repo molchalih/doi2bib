@@ -42,3 +42,36 @@ export function addToHistory(history: HistoryEntry[], entry: HistoryEntry): Hist
   const updated = [entry, ...sorted];
   return updated.slice(0, HISTORY_CAP);
 }
+
+export function formatBib(raw: string): string {
+  const trimmed = raw.trim();
+  const headerMatch = trimmed.match(/^(@\w+\{[^,]+),/);
+  if (!headerMatch) return trimmed;
+
+  const header = headerMatch[1];
+  const bodyStart = headerMatch[0].length;
+  const bodyEnd = trimmed.lastIndexOf("}");
+  if (bodyEnd <= bodyStart) return trimmed;
+
+  const bodyRaw = trimmed.slice(bodyStart, bodyEnd);
+  const fields: string[] = [];
+  let current = "";
+  let depth = 0;
+
+  for (const char of bodyRaw) {
+    if (char === "{") depth++;
+    else if (char === "}") depth--;
+    else if (char === "," && depth === 0) {
+      const field = current.trim();
+      if (field) fields.push(field);
+      current = "";
+      continue;
+    }
+    current += char;
+  }
+  const lastField = current.trim();
+  if (lastField) fields.push(lastField);
+
+  const formattedFields = fields.map((f) => `  ${f}`).join(",\n");
+  return `${header},\n${formattedFields}\n}`;
+}

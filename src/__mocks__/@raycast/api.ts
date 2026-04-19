@@ -15,4 +15,6 @@ export const Toast = { Style: { Failure: "failure", Success: "success", Animated
 export const List = () => null;
 export const Action = () => null;
 export const ActionPanel = () => null;
-export const Icon = {};
+export const Icon = { Trash: "trash", Download: "download" };
+export const environment = { supportPath: "/tmp/raycast-support" };
+export const open = jest.fn();

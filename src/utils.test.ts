@@ -1,4 +1,4 @@
-import { looksLikeDoi, relativeTime, addToHistory, HistoryEntry, extractDoi } from "./utils";
+import { looksLikeDoi, relativeTime, addToHistory, HistoryEntry, extractDoi, formatBib } from "./utils";
 
 describe("looksLikeDoi", () => {
   it("returns true for a typical DOI", () => {
@@ -107,5 +107,44 @@ describe("extractDoi", () => {
   });
   it("trims whitespace", () => {
     expect(extractDoi("  10.1177/abc  ")).toBe("10.1177/abc");
+  });
+});
+
+describe("formatBib", () => {
+  it("formats single-line bibtex with proper indentation", () => {
+    const input = "@article{abc,author={Smith, John},title={A Title}}";
+    const result = formatBib(input);
+    expect(result).toContain("@article{abc,\n");
+    expect(result).toContain("  author={Smith, John},");
+    expect(result).toContain("  title={A Title}");
+  });
+
+  it("normalizes already-indented bibtex", () => {
+    const input = `@article{xyz,
+      author = {Doe, Jane},
+      title = {Another Title}
+    }`;
+    const result = formatBib(input);
+    expect(result).toContain("@article{xyz,\n");
+    expect(result).toContain("  author = {Doe, Jane},");
+    expect(result).toContain("  title = {Another Title}");
+  });
+
+  it("handles fields with nested braces", () => {
+    const input = "@article{test,author={Last, First},note={See also {Smith}}}";
+    const result = formatBib(input);
+    expect(result).toContain("  author={Last, First},");
+    expect(result).toContain("  note={See also {Smith}}");
+  });
+
+  it("returns raw input if not parseable", () => {
+    const input = "not a bibtex";
+    expect(formatBib(input)).toBe(input);
+  });
+
+  it("removes trailing comma from last field", () => {
+    const input = "@article{k,a={1},b={2},}";
+    const result = formatBib(input);
+    expect(result).not.toMatch(/,\s*\}/);
   });
 });

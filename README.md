@@ -1,4 +1,4 @@
-<div align="center" style="margin: 100px;">
+<div align="center" style="width: 100%; padding: 100px; box-sizing: border-box;">
   <img src="assets/logo.png" width="100%" alt="doi2bib" style="display: block;" />
 </div>
 

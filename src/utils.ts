@@ -6,6 +6,19 @@ export interface HistoryEntry {
 
 const HISTORY_CAP = 50;
 
+const DOI_URL_PREFIXES = ["https://doi.org/", "http://doi.org/", "https://dx.doi.org/", "http://dx.doi.org/"];
+
+export function extractDoi(raw: string): string {
+  let doi = raw.trim();
+  for (const prefix of DOI_URL_PREFIXES) {
+    if (doi.startsWith(prefix)) {
+      doi = doi.slice(prefix.length);
+      break;
+    }
+  }
+  return doi;
+}
+
 export function looksLikeDoi(text: string): boolean {
   const trimmed = text.trim();
   return trimmed.length > 0 && trimmed.includes("/");

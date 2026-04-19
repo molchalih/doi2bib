@@ -1,4 +1,4 @@
-import { looksLikeDoi, relativeTime, addToHistory, HistoryEntry } from "./utils";
+import { looksLikeDoi, relativeTime, addToHistory, HistoryEntry, extractDoi } from "./utils";
 
 describe("looksLikeDoi", () => {
   it("returns true for a typical DOI", () => {
@@ -92,5 +92,20 @@ describe("addToHistory", () => {
     expect(result).toHaveLength(50);
     expect(result[0].doi).toBe("10.1/49");
     expect(result[0].bib).toBe("@article{refreshed}");
+  });
+});
+
+describe("extractDoi", () => {
+  it("strips https://doi.org/ prefix", () => {
+    expect(extractDoi("https://doi.org/10.1038/nature12345")).toBe("10.1038/nature12345");
+  });
+  it("strips http://dx.doi.org/ prefix", () => {
+    expect(extractDoi("http://dx.doi.org/10.1038/nature12345")).toBe("10.1038/nature12345");
+  });
+  it("returns bare DOI unchanged", () => {
+    expect(extractDoi("10.1177/20563051231193027")).toBe("10.1177/20563051231193027");
+  });
+  it("trims whitespace", () => {
+    expect(extractDoi("  10.1177/abc  ")).toBe("10.1177/abc");
   });
 });

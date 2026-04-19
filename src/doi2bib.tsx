@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Clipboard, List, LocalStorage, showHUD, showToast, popToRoot, Toast } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
-import { HistoryEntry, looksLikeDoi, relativeTime, addToHistory } from "./utils";
+import { HistoryEntry, looksLikeDoi, relativeTime, addToHistory, extractDoi } from "./utils";
 
 const STORAGE_KEY = "doi2bib-history";
 
@@ -28,7 +28,7 @@ export default function Command() {
       // Auto-fetch clipboard DOI
       try {
         const { text } = await Clipboard.read();
-        const trimmed = (text ?? "").trim();
+        const trimmed = extractDoi(text ?? "");
         if (looksLikeDoi(trimmed)) {
           setDoi(trimmed);
           fetchBib(trimmed);
@@ -41,7 +41,7 @@ export default function Command() {
   }, []);
 
   async function fetchBib(rawDoi: string) {
-    const trimmed = rawDoi.trim();
+    const trimmed = extractDoi(rawDoi);
     setIsLoading(true);
     setCurrentBib(null);
     try {

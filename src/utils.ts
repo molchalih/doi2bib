@@ -13,6 +13,7 @@ export function looksLikeDoi(text: string): boolean {
 
 export function relativeTime(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime();
+  if (isNaN(diffMs)) return "unknown";
   const diffMin = Math.floor(diffMs / 60000);
   if (diffMin < 1) return "just now";
   if (diffMin < 60) return `${diffMin} min ago`;

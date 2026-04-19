@@ -1,10 +1,4 @@
-import { looksLikeDoi, relativeTime, addToHistory } from "./utils";
-
-interface HistoryEntry {
-  doi: string;
-  bib: string;
-  fetchedAt: string;
-}
+import { looksLikeDoi, relativeTime, addToHistory, HistoryEntry } from "./utils";
 
 describe("looksLikeDoi", () => {
   it("returns true for a typical DOI", () => {
@@ -40,6 +34,17 @@ describe("relativeTime", () => {
   it("returns days ago", () => {
     const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
     expect(relativeTime(threeDaysAgo)).toBe("3 days ago");
+  });
+  it("returns 'unknown' for an invalid date string", () => {
+    expect(relativeTime("not-a-date")).toBe("unknown");
+  });
+  it("returns hours at exactly 60 minutes", () => {
+    const exactly60MinAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    expect(relativeTime(exactly60MinAgo)).toBe("1 hr ago");
+  });
+  it("returns days at exactly 24 hours", () => {
+    const exactly24HrAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    expect(relativeTime(exactly24HrAgo)).toBe("1 days ago");
   });
 });
 
@@ -78,5 +83,14 @@ describe("addToHistory", () => {
     expect(result).toHaveLength(50);
     expect(result[0].doi).toBe("10.1/new");
     expect(result[49].doi).toBe("10.1/1");
+  });
+
+  it("handles dedup and cap together: existing DOI in full 50-entry history", () => {
+    const history = Array.from({ length: 50 }, (_, i) => makeEntry(`10.1/${i}`, 50 - i));
+    const updated = { doi: "10.1/49", bib: "@article{refreshed}", fetchedAt: new Date().toISOString() };
+    const result = addToHistory(history, updated);
+    expect(result).toHaveLength(50);
+    expect(result[0].doi).toBe("10.1/49");
+    expect(result[0].bib).toBe("@article{refreshed}");
   });
 });

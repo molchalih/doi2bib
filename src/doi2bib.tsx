@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, showHUD, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, List, LocalStorage, showHUD, showToast, popToRoot, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { HistoryEntry, looksLikeDoi, relativeTime, addToHistory } from "./utils";
 
@@ -11,7 +11,34 @@ export default function Command() {
   const [currentBib, setCurrentBib] = useState<string | null>(null);
 
   async function fetchBib(rawDoi: string) {
-    // implemented in Task 5
+    const trimmed = rawDoi.trim();
+    setIsLoading(true);
+    setCurrentBib(null);
+    try {
+      const response = await fetch(`https://doi.org/${trimmed}`, {
+        headers: { Accept: "application/x-bibtex" },
+        redirect: "follow",
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const bib = await response.text();
+      if (!bib.trim()) {
+        throw new Error("No BibTeX returned");
+      }
+      setCurrentBib(bib);
+      const entry: HistoryEntry = { doi: trimmed, bib, fetchedAt: new Date().toISOString() };
+      setHistory((prev) => {
+        const updated = addToHistory(prev, entry);
+        LocalStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+        return updated;
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      await showToast({ style: Toast.Style.Failure, title: "Fetch failed", message });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   const showFetchItem = looksLikeDoi(doi) && doi !== history[0]?.doi;
@@ -36,7 +63,18 @@ export default function Command() {
           }
           actions={
             <ActionPanel>
-              <Action title="Fetch BibTeX" onAction={() => fetchBib(doi)} />
+              {currentBib ? (
+                <Action.CopyToClipboard
+                  title="Copy BibTeX"
+                  content={currentBib}
+                  onCopy={async () => {
+                    await showHUD("Copied!");
+                    await popToRoot();
+                  }}
+                />
+              ) : (
+                <Action title="Fetch BibTeX" onAction={() => fetchBib(doi)} />
+              )}
             </ActionPanel>
           }
         />

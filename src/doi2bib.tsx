@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Clipboard, List, LocalStorage, showHUD, showToast, popToRoot, Toast } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { HistoryEntry, looksLikeDoi, relativeTime, addToHistory } from "./utils";
 
 const STORAGE_KEY = "doi2bib-history";
@@ -7,6 +7,7 @@ const STORAGE_KEY = "doi2bib-history";
 export default function Command() {
   const [doi, setDoi] = useState("");
   const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const historyRef = useRef<HistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentBib, setCurrentBib] = useState<string | null>(null);
 
@@ -15,7 +16,11 @@ export default function Command() {
       // Load history
       try {
         const stored = await LocalStorage.getItem<string>(STORAGE_KEY);
-        if (stored) setHistory(JSON.parse(stored));
+        if (stored) {
+          const loaded = JSON.parse(stored) as HistoryEntry[];
+          historyRef.current = loaded;
+          setHistory(loaded);
+        }
       } catch {
         // silently fallback to empty history
       }
@@ -53,7 +58,8 @@ export default function Command() {
       }
       setCurrentBib(bib);
       const entry: HistoryEntry = { doi: trimmed, bib, fetchedAt: new Date().toISOString() };
-      const updated = addToHistory(history, entry);
+      const updated = addToHistory(historyRef.current, entry);
+      historyRef.current = updated;
       setHistory(updated);
       LocalStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     } catch (err) {

@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Clipboard, Icon, List, LocalStorage, showHUD, showToast, popToRoot, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Icon,
+  List,
+  LocalStorage,
+  showHUD,
+  showToast,
+  popToRoot,
+  Toast,
+} from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import { HistoryEntry, looksLikeDoi, relativeTime, addToHistory, extractDoi, formatBib } from "./utils";
 
@@ -82,7 +93,6 @@ export default function Command() {
     setHistory([]);
     setSelectedItemId("");
   }
-
 
   return (
     <List

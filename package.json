@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "doi2bib",
-  "title": "doi2bib",
-  "description": "simply convert DOI of a paper to .bib format",
+  "title": "DOI2BIB",
+  "description": "Convert DOIs to BibTeX citations instantly",
   "icon": "extension-icon.png",
   "author": "molchalih",
   "platforms": [

@@ -21,7 +21,7 @@ export function extractDoi(raw: string): string {
 
 export function looksLikeDoi(text: string): boolean {
   const trimmed = text.trim();
-  return trimmed.length > 0 && trimmed.includes("/");
+  return /^(https?:\/\/)?(dx\.)?doi\.org\/10\.\d+\/|^10\.\d+\//.test(trimmed);
 }
 
 export function relativeTime(iso: string): string {

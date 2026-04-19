@@ -13,7 +13,7 @@ compiled_raycast_rust
 # AI tooling (development only)
 .remember/
 docs/superpowers/
-.CLAUDE.md
+CLAUDE.md
 
 # misc
 .DS_Store

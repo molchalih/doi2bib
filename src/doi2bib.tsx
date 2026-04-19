@@ -1,8 +1,6 @@
-import { Action, ActionPanel, Clipboard, Icon, List, LocalStorage, environment, open, showHUD, showToast, popToRoot, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Icon, List, LocalStorage, showHUD, showToast, popToRoot, Toast } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import { HistoryEntry, looksLikeDoi, relativeTime, addToHistory, extractDoi, formatBib } from "./utils";
-import { writeFileSync } from "fs";
-import { join } from "path";
 
 const STORAGE_KEY = "doi2bib-history";
 
@@ -85,12 +83,6 @@ export default function Command() {
     setSelectedItemId("");
   }
 
-  async function downloadBib() {
-    const content = history.map((e) => e.bib).join("\n\n");
-    const filePath = join(environment.supportPath, "history.bib");
-    writeFileSync(filePath, content, "utf8");
-    await open(filePath);
-  }
 
   return (
     <List
@@ -132,7 +124,7 @@ export default function Command() {
       )}
 
       {history.length > 0 && (
-        <List.Section title="History" subtitle="⌘⇧⌫ Clear · ⌘S Download">
+        <List.Section title="Bibliography" subtitle="⌘⇧⌫ Clear · ⌘S Copy">
           {history.map((entry) => (
             <List.Item
               id={entry.doi}
@@ -156,11 +148,14 @@ export default function Command() {
                     shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
                     onAction={clearHistory}
                   />
-                  <Action
-                    title="Download .bib"
-                    icon={Icon.Download}
+                  <Action.CopyToClipboard
+                    title="Copy Bibliography"
+                    content={history.map((e) => e.bib).join("\n\n")}
                     shortcut={{ modifiers: ["cmd"], key: "s" }}
-                    onAction={downloadBib}
+                    onCopy={async () => {
+                      await showHUD("Copied!");
+                      await popToRoot();
+                    }}
                   />
                 </ActionPanel>
               }

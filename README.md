@@ -37,4 +37,4 @@ cd doi2bib && npm install
 - lets you copy an entry or export your history
 
 [doi2bib-raycast-badge]: https://img.shields.io/badge/Raycast-doi2bib-eee?labelColor=FF6363&logo=raycast&logoColor=fff&style=flat-square
-[doi2bib-raycast-link]: https://github.com/molchalih/doi2bib
+[doi2bib-raycast-link]: raycast://manage-extensions?names=doi2bib

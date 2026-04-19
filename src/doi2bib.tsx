@@ -42,6 +42,7 @@ export default function Command() {
 
   async function fetchBib(rawDoi: string) {
     const trimmed = extractDoi(rawDoi);
+    setDoi(trimmed);
     setIsLoading(true);
     setCurrentBib(null);
     try {
@@ -61,7 +62,7 @@ export default function Command() {
       const updated = addToHistory(historyRef.current, entry);
       historyRef.current = updated;
       setHistory(updated);
-      LocalStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       await showToast({ style: Toast.Style.Failure, title: "Fetch failed", message });

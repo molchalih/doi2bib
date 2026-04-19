@@ -44,7 +44,7 @@ describe("relativeTime", () => {
   });
   it("returns days at exactly 24 hours", () => {
     const exactly24HrAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    expect(relativeTime(exactly24HrAgo)).toBe("1 days ago");
+    expect(relativeTime(exactly24HrAgo)).toBe("1 day ago");
   });
 });
 

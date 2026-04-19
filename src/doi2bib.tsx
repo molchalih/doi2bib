@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, LocalStorage, showHUD, showToast, popToRoot, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, List, LocalStorage, showHUD, showToast, popToRoot, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { HistoryEntry, looksLikeDoi, relativeTime, addToHistory } from "./utils";
 
@@ -9,6 +9,31 @@ export default function Command() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentBib, setCurrentBib] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function init() {
+      // Load history
+      try {
+        const stored = await LocalStorage.getItem<string>(STORAGE_KEY);
+        if (stored) setHistory(JSON.parse(stored));
+      } catch {
+        // silently fallback to empty history
+      }
+
+      // Auto-fetch clipboard DOI
+      try {
+        const { text } = await Clipboard.read();
+        const trimmed = (text ?? "").trim();
+        if (looksLikeDoi(trimmed)) {
+          setDoi(trimmed);
+          fetchBib(trimmed);
+        }
+      } catch {
+        // no clipboard access — skip
+      }
+    }
+    init();
+  }, []);
 
   async function fetchBib(rawDoi: string) {
     const trimmed = rawDoi.trim();

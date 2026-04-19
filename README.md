@@ -1,12 +1,10 @@
 <div align="center">
-  <img src="assets/logo.png" width="280" alt="doi2bib" />
+  <img src="assets/logo.png" width="500" alt="doi2bib" />
 </div>
 
 <p align="center">
   <strong>Convert DOI → BibTeX in one keystroke</strong>
 </p>
-
----
 
 ## Features
 

@@ -1,5 +1,5 @@
-<div align="center">
-  <img src="assets/logo.png" width="500" alt="doi2bib" />
+<div align="center" style="width: 100%; max-width: 600px; margin: 0 auto;">
+  <img src="assets/logo.png" width="100%" alt="doi2bib" style="display: block;" />
 </div>
 
 <p align="center">

@@ -28,11 +28,9 @@ export default function Command() {
       }
       setCurrentBib(bib);
       const entry: HistoryEntry = { doi: trimmed, bib, fetchedAt: new Date().toISOString() };
-      setHistory((prev) => {
-        const updated = addToHistory(prev, entry);
-        LocalStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-        return updated;
-      });
+      const updated = addToHistory(history, entry);
+      setHistory(updated);
+      LocalStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       await showToast({ style: Toast.Style.Failure, title: "Fetch failed", message });
